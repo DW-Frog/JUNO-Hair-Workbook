@@ -1,10 +1,15 @@
 /* ===== 결과 화면 ===== */
 const QU = window.QU, META = window.QUIZ_META;
-function ResultScreen({ session, leveledUp, newLevel, newRank, onAgain, onRetryWrong, onHome }){
+function ResultScreen({ session, profile, leveledUp, newLevel, newRank, onAgain, onRetryWrong, onHome }){
   const total = session.results.length;
   const correct = session.results.filter(r=>r.ok).length;
   const rate = total ? Math.round(correct/total*100) : 0;
   const wrong = session.results.filter(r=>!r.ok).map(r=>QU.byId(r.id));
+  const isExam = session.mode==="exam";
+  const isDaily = session.mode==="daily";
+  const examPass = rate>=80;
+  const dailyGain = (profile && profile.lastResult && profile.lastResult.dailyGain) || 0;
+  const streak = profile ? QU.dailyStreak(profile) : 0;
 
   let mood="happy", title="완료!", sub="수고했어요";
   if(rate===100){ mood="proud"; title="올킬! 퍼펙트!"; sub="완벽해요, 가격 마스터 ✨"; }
@@ -13,6 +18,8 @@ function ResultScreen({ session, leveledUp, newLevel, newRank, onAgain, onRetryW
   else { mood="sad"; title="다시 도전!"; sub="오답노트로 복습해봐요"; }
   const stars = rate===100?3 : rate>=70?2 : rate>=40?1 : 0;
   const duckLineKey = rate>=80?"win":rate>=50?"okhalf":"no";
+  if(isExam){ title = examPass?"합격! 🎉":"불합격 😢"; sub = examPass?"가격 마스터 자격 충분!":"80점 이상이면 합격이에요"; mood = examPass?"proud":"sad"; }
+  if(isDaily){ title = "오늘의 도전 완료!"; sub = streak>1?`${streak}일 연속 출석 중 🔥`:"내일도 잊지 말고 와요!"; if(rate>=60) mood="happy"; }
 
   // 이번 판 분야별
   const byCat = {};
@@ -35,6 +42,24 @@ function ResultScreen({ session, leveledUp, newLevel, newRank, onAgain, onRetryW
         <div className="result-title jua">{title}</div>
         <div className="result-sub">{sub}</div>
         <div className="result-bubble"><DuckBubble text={window.duckLine(duckLineKey)} tone={rate>=50?"ok":"no"}/></div>
+
+        {isExam && (
+          <div className={"exam-verdict "+(examPass?"pass":"fail")}>
+            <div className="ev-stamp">{examPass?"합격":"불합격"}</div>
+            <div className="ev-body">
+              <div className="ev-score">{rate}점</div>
+              <div className="ev-line">{correct}/{total} 정답 · 합격 기준 80점</div>
+              <div className="ev-bar"><i style={{width:rate+"%"}}></i><span className="ev-pass" style={{left:"80%"}}></span></div>
+            </div>
+          </div>
+        )}
+        {isDaily && dailyGain>0 && (
+          <div className="daily-reward">
+            <div className="dr-ic">🔥</div>
+            <div><div className="dr-a">{streak}일 연속 출석!</div>
+              <div className="dr-b">출석 보너스 +{dailyGain} XP</div></div>
+          </div>
+        )}
 
         <div className="scorebig">
           <div className="lab">획득 점수</div>

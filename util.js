@@ -30,7 +30,7 @@
   // ---- 저장 ----
   function blank(){
     return { xp:0, answered:0, correct:0, bestCombo:0, plays:0,
-             perCat:{}, wrongIds:[], lastResult:null };
+             perCat:{}, wrongIds:[], dailyStreak:0, lastDailyDate:null, lastResult:null };
   }
   function load(){
     try{ const r=JSON.parse(localStorage.getItem(KEY)); return r?Object.assign(blank(),r):blank(); }
@@ -58,15 +58,43 @@
   }
   function fmt(n){ return Number(n).toLocaleString("ko-KR"); }
 
+  // ---- 날짜/시드 (데일리) ----
+  function pad(n){ return String(n).padStart(2,"0"); }
+  function dStr(d){ return ""+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate()); }
+  function todayStr(){ return dStr(new Date()); }
+  function yesterdayStr(){ const d=new Date(); d.setDate(d.getDate()-1); return dStr(d); }
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function seedFromStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+  function seededShuffle(arr, seed){ const r=mulberry32(seed); const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+  function isDailyDone(p){ return p.lastDailyDate===todayStr(); }
+  function dailyStreak(p){ return p.dailyStreak||0; }
+
   // ---- 큐 만들기 ----
   function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
   const ALL = window.QUIZ_QUESTIONS;
   function byId(id){ return ALL.find(q=>q.id===id); }
+  const DAILY_N = 5, EXAM_N = 30;
   function buildQueue(mode, profile){
     if(mode==="all")    return ALL.map(q=>q.id);
     if(mode==="random") return shuffle(ALL.map(q=>q.id));
     if(mode==="time")   return shuffle(ALL.map(q=>q.id));
     if(mode==="retry")  return shuffle((profile.wrongIds||[]).filter(byId));
+    if(mode==="daily")  return seededShuffle(ALL.map(q=>q.id), seedFromStr(todayStr())).slice(0,DAILY_N);
+    if(mode==="exam")   return shuffle(ALL.map(q=>q.id)).slice(0,EXAM_N);
+    if(mode==="weak"){
+      // 1) 틀린 문제 우선, 2) 정답률 낮은 분야 문제 보충
+      const stats = catStats(profile).filter(c=>c.seen>0).sort((a,b)=>a.pct-b.pct);
+      let ids = (profile.wrongIds||[]).filter(byId);
+      for(const c of stats){
+        if(c.pct>=85) continue;
+        ids = ids.concat(ALL.filter(q=>q.cat===c.key).map(q=>q.id));
+        if(ids.length>=16) break;
+      }
+      ids = Array.from(new Set(ids));
+      if(!ids.length) ids = shuffle(ALL.map(q=>q.id)).slice(0,12); // 데이터 없으면 랜덤
+      return shuffle(ids).slice(0, Math.min(16, Math.max(8, ids.length)));
+    }
     if(mode && mode.startsWith("cat:")){
       const c=mode.slice(4);
       return ALL.filter(q=>q.cat===c).map(q=>q.id);
@@ -128,10 +156,21 @@
     const set = new Set(p.wrongIds||[]);
     session.results.forEach(r=>{ if(r.ok) set.delete(r.id); else set.add(r.id); });
     p.wrongIds = Array.from(set);
+    // 데일리: 연속 출석 처리 (하루 1회만 카운트)
+    let dailyGain = 0;
+    if(session.mode==="daily"){
+      const today=todayStr();
+      if(p.lastDailyDate!==today){
+        p.dailyStreak = (p.lastDailyDate===yesterdayStr()) ? (p.dailyStreak||0)+1 : 1;
+        p.lastDailyDate = today;
+        dailyGain = 10 + (p.dailyStreak)*5; // 연속일 보너스 XP
+        p.xp += dailyGain;
+      }
+    }
     p.lastResult = {
       score:session.score, xp:session.xpEarned, total:session.results.length,
       correct:session.results.filter(r=>r.ok).length, maxCombo:session.maxCombo,
-      mode:session.mode, at:Date.now()
+      mode:session.mode, at:Date.now(), dailyGain
     };
     save(p);
     return p;
@@ -150,5 +189,6 @@
 
   window.QU = { RANKS, rankFor, levelInfo, xpForLevel, load, save, reset, blank,
     gradeShort, gradeNum, calcFinal, fmt, digits, shuffle, buildQueue, byId, ALL,
-    pointsFor, comboMult, commit, catStats, sound };
+    pointsFor, comboMult, commit, catStats, sound,
+    todayStr, isDailyDone, dailyStreak, DAILY_N, EXAM_N };
 })();

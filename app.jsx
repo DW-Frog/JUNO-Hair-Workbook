@@ -48,7 +48,7 @@ function App(){
         {view==="wrong" && <WrongScreen profile={profile} onStart={start}/>}
         {view==="profile" && <ProfileScreen profile={profile} onReset={reset}/>}
         {view==="result" && session &&
-          <ResultScreen session={session} leveledUp={lvUp.on} newLevel={lvUp.level} newRank={lvUp.rank}
+          <ResultScreen session={session} profile={profile} leveledUp={lvUp.on} newLevel={lvUp.level} newRank={lvUp.rank}
             onAgain={()=>start(mode)}
             onRetryWrong={()=>start("retry")}
             onHome={()=>setView("home")} />}

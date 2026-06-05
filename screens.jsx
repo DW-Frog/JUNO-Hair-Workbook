@@ -33,8 +33,14 @@ function HomeScreen({ profile, onStart }){
   const rate = profile.answered ? Math.round(profile.correct/profile.answered*100) : 0;
   const cats = QU.catStats(profile);
   const wrongN = (profile.wrongIds||[]).length;
+  const dailyDone = QU.isDailyDone(profile);
+  const streak = QU.dailyStreak(profile);
+  const seenCats = QU.catStats(profile).filter(c=>c.seen>0).sort((a,b)=>a.pct-b.pct);
+  const worst = seenCats[0];
 
   const modes = [
+    { mode:"exam",   a:"합격 모의고사", b:`${QU.EXAM_N}문제 · 80점 합격 판정`, ic:"📝", bg:"var(--blue)" },
+    { mode:"weak",   a:"약점 집중 공략", b: worst?`약한 분야 집중 (${worst.emoji}${worst.name})`:"먼저 몇 문제 풀어보세요", ic:"🎯", bg:"#FF7A8A" },
     { mode:"all",    a:"전체 문제",   b:"모든 문제를 순서대로 정복", ic:"📚", bg:"var(--purple)" },
     { mode:"random", a:"랜덤 섞기",   b:"무작위로 출제, 실전 감각",  ic:"🎲", bg:"var(--pink)" },
     { mode:"time",   a:"타임어택",    b:"제한시간 안에 최대 점수!",   ic:"⚡", bg:"var(--amber)" },
@@ -48,6 +54,19 @@ function HomeScreen({ profile, onStart }){
           <div className="mini"><div className="v">{profile.plays}</div><div className="l">플레이</div></div>
           <div className="mini"><div className="v">{rate}%</div><div className="l">정답률</div></div>
           <div className="mini"><div className="v">🔥{profile.bestCombo}</div><div className="l">최고 콤보</div></div>
+        </div>
+
+        {/* 오늘의 도전 */}
+        <div className={"daily-card"+(dailyDone?" done":"")} onClick={()=>onStart("daily")}>
+          <div className="daily-flame">
+            <div className="flame-ic">{streak>0?"🔥":"☀️"}</div>
+            <div className="flame-n">{streak}일</div>
+          </div>
+          <div className="daily-body">
+            <div className="daily-t">오늘의 5문제 {dailyDone&&<span className="daily-chk">완료 ✓</span>}</div>
+            <div className="daily-b">{dailyDone?"내일 또 오면 연속 출석 유지!":`매일 새 문제 · ${streak>0?`${streak}일 연속 도전 중!`:"연속 출석 시작!"}`}</div>
+          </div>
+          <div className="daily-go">{dailyDone?"다시":"시작"}</div>
         </div>
 
         <div className="sec-t">🎮 모드 선택</div>
