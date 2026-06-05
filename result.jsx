@@ -6,11 +6,13 @@ function ResultScreen({ session, leveledUp, newLevel, newRank, onAgain, onRetryW
   const rate = total ? Math.round(correct/total*100) : 0;
   const wrong = session.results.filter(r=>!r.ok).map(r=>QU.byId(r.id));
 
-  let emoji="🎯", title="완료!", sub="수고했어요";
-  if(rate===100){ emoji="🏆"; title="올킬! 퍼펙트!"; sub="완벽해요, 가격 마스터 ✨"; }
-  else if(rate>=80){ emoji="🎉"; title="훌륭해요!"; sub="거의 다 맞혔어요"; }
-  else if(rate>=50){ emoji="💪"; title="좋아요!"; sub="조금만 더 연습하면 완벽!"; }
-  else { emoji="📖"; title="다시 도전!"; sub="오답노트로 복습해봐요"; }
+  let mood="happy", title="완료!", sub="수고했어요";
+  if(rate===100){ mood="proud"; title="올킬! 퍼펙트!"; sub="완벽해요, 가격 마스터 ✨"; }
+  else if(rate>=80){ mood="wow"; title="훌륭해요!"; sub="거의 다 맞혔어요"; }
+  else if(rate>=50){ mood="happy"; title="좋아요!"; sub="조금만 더 연습하면 완벽!"; }
+  else { mood="sad"; title="다시 도전!"; sub="오답노트로 복습해봐요"; }
+  const stars = rate===100?3 : rate>=70?2 : rate>=40?1 : 0;
+  const duckLineKey = rate>=80?"win":rate>=50?"okhalf":"no";
 
   // 이번 판 분야별
   const byCat = {};
@@ -25,9 +27,14 @@ function ResultScreen({ session, leveledUp, newLevel, newRank, onAgain, onRetryW
   return (
     <div className="scroll fade">
       <div className="result-top">
-        <div className="bigemoji">{emoji}</div>
+        <div className="result-duck"><Duck mood={mood} size={120} bob/></div>
+        <div className="stars">
+          {[0,1,2].map(i=>(<span key={i} className={"star"+(i<stars?" on":"")}
+            style={{animationDelay:(i*0.15)+"s"}}>★</span>))}
+        </div>
         <div className="result-title jua">{title}</div>
         <div className="result-sub">{sub}</div>
+        <div className="result-bubble"><DuckBubble text={window.duckLine(duckLineKey)} tone={rate>=50?"ok":"no"}/></div>
 
         <div className="scorebig">
           <div className="lab">획득 점수</div>

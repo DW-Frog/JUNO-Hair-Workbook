@@ -18,7 +18,9 @@ function App(){
     const after = QU.levelInfo(p.xp).level;
     setProfile({...p});
     setSession(sess);
-    setLvUp({ on: after>before, level:after, rank:QU.rankFor(after) });
+    const lv = after>before;
+    setLvUp({ on: lv, level:after, rank:QU.rankFor(after) });
+    setTimeout(()=>{ if(lv) QU.sound.level(); },300);
     setView("result");
     document.querySelector(".app .scroll")?.scrollTo?.(0,0);
   }

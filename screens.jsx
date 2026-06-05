@@ -9,10 +9,10 @@ function RankHeader({ profile, compact }){
   return (
     <div className="home-top" style={compact?{borderRadius:0,paddingBottom:16}:null}>
       <div className="brand">
-        <div className="logo">💇‍♀️</div>
+        <div className="logo"><Duck mood="happy" size={40}/></div>
         <div>
           <div className="t1">{META.store} 가격 마스터</div>
-          <div className="t2">시험 공부 게임</div>
+          <div className="t2">꽥꽥 시험 공부 게임</div>
         </div>
       </div>
       <div className="rankcard">

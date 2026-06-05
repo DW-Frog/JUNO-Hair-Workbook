@@ -101,8 +101,8 @@ body{
 }
 .brand{display:flex;align-items:center;gap:9px;}
 .brand .logo{
-  width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.22);
-  display:flex;align-items:center;justify-content:center;font-size:21px;
+  width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.28);
+  display:flex;align-items:center;justify-content:center;
 }
 .brand .t1{font-size:13px;opacity:.9;font-weight:700;line-height:1;white-space:nowrap;}
 .brand .t2{font-size:18px;font-weight:800;line-height:1.1;white-space:nowrap;}
@@ -188,6 +188,8 @@ body{
 .qwrap{flex:1 1 auto;min-height:0;overflow-y:auto;padding:8px 16px 16px;}
 .qwrap::-webkit-scrollbar{width:0;}
 .qcard{background:#fff;border-radius:24px;padding:20px 18px;box-shadow:var(--shadow);}
+.qcardhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.stepbadge{font-size:11.5px;font-weight:800;color:var(--purple-d);background:var(--soft);padding:5px 11px;border-radius:99px;white-space:nowrap;}
 .qcat{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#fff;padding:5px 12px;border-radius:99px;}
 .qtext{font-size:21px;font-weight:800;line-height:1.4;margin-top:14px;letter-spacing:-.01em;}
 .qtext b{color:var(--purple-d);}
@@ -273,9 +275,33 @@ body{
 .fb.no{background:linear-gradient(160deg,var(--red),var(--red-d));}
 .fb .fbh{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:900;font-family:'Jua';white-space:nowrap;}
 .fb .fbh .big{font-size:30px;}
-.fb .fbsub{font-size:14px;opacity:.95;margin-top:6px;font-weight:600;line-height:1.45;}
+.fb .fbsub{font-size:14px;opacity:.95;margin-top:10px;font-weight:600;line-height:1.45;}
 .fb .fbsub b{font-weight:900;}
-.fb .xpgain{margin-left:auto;font-size:15px;font-weight:900;background:rgba(255,255,255,.25);padding:5px 11px;border-radius:99px;}
+.fb .xpgain{font-size:17px;font-weight:900;font-family:'Jua';background:rgba(255,255,255,.28);padding:6px 12px;border-radius:99px;flex:none;}
+
+/* 오리 피드백 행 */
+.fb-duckrow{display:flex;align-items:center;gap:10px;}
+.fb-duck{flex:none;margin-top:-34px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));}
+.fb-next{margin-top:14px;}
+.fb.ok .fb-next{color:var(--green-d);}
+.fb.no .fb-next{color:var(--red-d);}
+.fevertag{display:inline-block;margin-left:8px;font-size:12px;font-weight:900;background:rgba(255,255,255,.3);padding:2px 9px;border-radius:99px;}
+
+/* 말풍선 */
+.duckbubble{
+  position:relative;flex:1;min-width:0;padding:10px 13px;border-radius:14px;
+  font-weight:800;font-size:15px;line-height:1.3;box-shadow:0 4px 12px rgba(0,0,0,.12);
+  animation:pop .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+.duckbubble .bubtail{position:absolute;left:-5px;top:50%;width:12px;height:12px;transform:translateY(-50%) rotate(45deg);border-radius:2px;}
+
+/* 오리 둥실 */
+.duck-bob{animation:bob 2.2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+
+/* 피버 */
+.qtop.fever{background:linear-gradient(180deg,rgba(251,183,51,.22),transparent);}
+.pill.combo.fever{background:linear-gradient(120deg,#FFD86B,#FB8C3E);color:#fff;animation:pulse .5s infinite;}
 
 /* 콤보 토스트 */
 .combotoast{
@@ -292,7 +318,15 @@ body{
 @keyframes drop{to{transform:translateY(900px) rotate(720deg);opacity:.9;}}
 
 /* ===== 결과 ===== */
-.result-top{text-align:center;padding:26px 18px 16px;}
+.result-top{text-align:center;padding:22px 18px 16px;}
+.result-duck{display:flex;justify-content:center;filter:drop-shadow(0 8px 14px rgba(0,0,0,.14));}
+.stars{display:flex;justify-content:center;gap:8px;margin-top:6px;}
+.stars .star{font-size:34px;color:#E6DEF2;transition:color .3s;}
+.stars .star.on{color:#FFC93C;text-shadow:0 2px 0 #F09A0E;animation:starpop .5s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes starpop{from{transform:scale(0) rotate(-30deg);}to{transform:scale(1) rotate(0);}}
+.result-bubble{display:flex;justify-content:center;margin:12px auto 0;max-width:280px;}
+.result-bubble .duckbubble{flex:none;}
+.result-bubble .bubtail{display:none;}
 .bigemoji{font-size:64px;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both;}
 .result-title{font-family:'Jua';font-size:30px;margin-top:6px;}
 .result-sub{color:var(--ink2);font-weight:700;font-size:14px;margin-top:2px;}

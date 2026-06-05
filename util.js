@@ -76,12 +76,39 @@
 
   // ---- 점수/XP ----
   function pointsFor(q){ return q.type==="calc"?20:10; }
-  function comboMult(combo){ // 콤보 보너스 배율
-    if(combo>=10) return 2;
-    if(combo>=5)  return 1.5;
-    if(combo>=3)  return 1.2;
+  function comboMult(combo){ // 콤보 보너스 배율 (피버: 5콤보 이상 2배)
+    if(combo>=10) return 2.5;
+    if(combo>=5)  return 2;     // 🔥 피버타임
+    if(combo>=3)  return 1.5;
     return 1;
   }
+  function gradeNum(input, answer){
+    const a=digits(input); if(!a) return false; return a===digits(answer);
+  }
+
+  // ---- 효과음 (합성, 에셋 없음) ----
+  let _actx=null, _on = (localStorage.getItem("juno_sound")||"1")==="1";
+  function ac(){ if(!_actx){ try{ _actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return _actx; }
+  function blip(freqs, type, dur, vol){
+    if(!_on) return; const a=ac(); if(!a) return;
+    try{ if(a.state==="suspended") a.resume();
+      let t=a.currentTime;
+      freqs.forEach(f=>{ const o=a.createOscillator(), g=a.createGain();
+        o.type=type; o.frequency.value=f;
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.012);
+        g.gain.exponentialRampToValueAtTime(0.0008,t+dur);
+        o.connect(g).connect(a.destination); o.start(t); o.stop(t+dur); t+=dur*0.78; });
+    }catch(e){}
+  }
+  const sound = {
+    correct(){ blip([880,1320],"triangle",0.12,0.16); },
+    wrong(){ blip([240,170],"sawtooth",0.17,0.10); },
+    fever(){ blip([784,1046,1318],"triangle",0.1,0.16); },
+    level(){ blip([523,659,784,1046],"triangle",0.14,0.18); },
+    tap(){ blip([620],"sine",0.045,0.06); },
+    get on(){ return _on; },
+    toggle(){ _on=!_on; localStorage.setItem("juno_sound",_on?"1":"0"); return _on; }
+  };
 
   // ---- 결과를 프로필에 반영 ----
   function commit(profile, session){
@@ -122,6 +149,6 @@
   }
 
   window.QU = { RANKS, rankFor, levelInfo, xpForLevel, load, save, reset, blank,
-    gradeShort, calcFinal, fmt, digits, shuffle, buildQueue, byId, ALL,
-    pointsFor, comboMult, commit, catStats };
+    gradeShort, gradeNum, calcFinal, fmt, digits, shuffle, buildQueue, byId, ALL,
+    pointsFor, comboMult, commit, catStats, sound };
 })();
