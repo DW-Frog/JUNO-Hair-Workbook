@@ -174,7 +174,7 @@ function QuizRunner({ mode, profile, onFinish, onQuit }){
               <span className="p" style={{color:"var(--green-d)"}}>{QU.fmt(QU.calcFinal(q))}원</span></div>
           </div>
         )}
-        <div style={{height:160}}></div>
+        <div style={{height:140}} className="qspacer"></div>
       </div>
 
       {/* 단답 키패드 */}
